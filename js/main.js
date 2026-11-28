@@ -43,7 +43,8 @@ const subtitleLocales = {
 	Chinese: 'zh-Hans',
 	TraditionalChinese: 'zh-Hant',
 	Japanese: 'ja',
-	Korean: 'ko'
+	Korean: 'ko',
+	Thai: 'th'
 };
 
 const CHARACTER = 'CH0267';
@@ -66,8 +67,8 @@ const AUDIO_DETAIL = [
 				"I'm a little unsure of how I should pose..."
 			],
 			Chinese: [
-				"虽然给别人拍了很多照片……但是还是第一次有别人给自己拍。",
-				"也不是很清楚，这种时候应该做点什么……"
+				"虽然拍过很多照片……不过，像这样被拍还是第一次呢。",
+				"不知道这种时候该怎么做比较好……"
 			],
 			TraditionalChinese: [
 				"照片，雖然拍了很多……像這樣被拍還是第一次呢。",
@@ -76,7 +77,8 @@ const AUDIO_DETAIL = [
 			Korean: [
 				"사진, 많이 찍어왔지만…… 이렇게 찍히는 건 처음이야.",
 				"이럴 때, 어떻게 하면 좋을지 모르겠네……."
-			]
+			],
+			Thai: ["ฉันถ่ายรูปมาก็เยอะ... แต่นี่เป็นครั้งแรกเลยที่โดนถ่าย","ตอนโดนถ่ายแบบนี้ ไม่รู้เลยว่าต้องทำตัวยังไง..."]
 		}
 	},
 	{
@@ -90,8 +92,8 @@ const AUDIO_DETAIL = [
 				"Get closer to the flowers? Okay."
 			],
 			Chinese: [
-				"这样笑可以吗？",
-				"再更靠近花一点……？我明白了。"
+				"像这样笑就可以了吗？",
+				"再往花那边靠一些……？好的。"
 			],
 			TraditionalChinese: [
 				"像這樣笑就行了嗎？",
@@ -100,7 +102,8 @@ const AUDIO_DETAIL = [
 			Korean: [
 				"이렇게, 웃으면 되려나?",
 				"좀 더 꽃 쪽으로 붙어……? 알았어."
-			]
+			],
+			Thai: ["ยิ้มแบบนี้จะได้มั้ยนะ?","ให้เข้าไปใกล้ดอกไม้อีกหน่อยเหรอ...? เข้าใจแล้วละ"]
 		}
 	},
 	{
@@ -112,14 +115,15 @@ const AUDIO_DETAIL = [
 				"Rosa Rugosa... What a pleasant scent."
 			],
 			Chinese: [
-				"玫瑰花……好香。"
+				"沙滩玫瑰的香味……真美妙。"
 			],
 			TraditionalChinese: [
-				"玫瑰花……好香。"
+				"濱薔薇……味道真香。"
 			],
 			Korean: [
-				"로사 루고사... 얼마나 쾌적한 냄새가 나나요?"
-			]
+				"해당화…… 좋은 향기."
+			],
+			Thai: ["กุหลาบป่า... กลิ่นหอมจัง"]
 		}
 	},
 	{
@@ -131,14 +135,15 @@ const AUDIO_DETAIL = [
 				"We just happened upon this place, but...it was thanks to you that I got to see it, Sensei."
 			],
 			Chinese: [
-				"虽然是偶然发现的地方……但还是托老师的福，才能来到这里。"
+				"多亏了老师，才能在偶然间发现这样的地方。"
 			],
 			TraditionalChinese: [
 				"雖然是偶然發現的地點……不過也是多虧了老師才能來到這裡。"
 			],
 			Korean: [
 				"우연히 발견한 장소지만…… 선생님 덕분에, 여기에 올 수 있었어."
-			]
+			],
+			Thai: ["ถึงจะเป็นที่ที่เจอโดยบังเอิญ... แต่ก็ขอบคุณคุณครูนะ ที่ทำให้ฉันได้มาที่นี่น่ะ"]
 		}
 	},
 	{
@@ -150,14 +155,15 @@ const AUDIO_DETAIL = [
 				"Thank you, Sensei. You've helped me make another wonderful memory."
 			],
 			Chinese: [
-				"谢谢你老师。这将会是我美好的回忆。"
+				"谢谢你，老师。带我创造了这么美好的回忆。"
 			],
 			TraditionalChinese: [
 				"謝謝你，老師。這是個美好的回憶唷。"
 			],
 			Korean: [
 				"고마워, 선생님, 멋진 추억이 되었어."
-			]
+			],
+			Thai: ["ขอบคุณนะ คุณครู เป็นความทรงจำที่ยอดเยี่ยมเลยละ"]
 		}
 	}
 ];
@@ -269,7 +275,7 @@ function playVoiceline() {
 			track.play().catch(finish);
 
 			if (dialogBox) {
-				textbox.textContent = dialog[window.selectedLanguage][index];
+				textbox.textContent = getSubtitleText(dialog, window.selectedLanguage, index);
 				textbox.style.opacity = 1;
 			}
 		},
@@ -439,6 +445,16 @@ function setMouse(event) {
 	return { x: ax - canvas.width * positionX, y: ay - canvas.height * positionY };
 }
 
+function getSubtitleText(dialog, language, index) {
+	let text = dialog?.[language]?.[index];
+	if (text == null && language === 'Thai') {
+		language = 'English';
+		text = dialog?.[language]?.[index];
+	}
+	textbox.lang = subtitleLocales[language];
+	return text ?? "";
+}
+
 function updateSubtitleLanguage() {
 	let language = subtitleLanguagePreference;
 	if (language === 'auto') {
@@ -452,6 +468,8 @@ function updateSubtitleLanguage() {
 			language = 'Japanese';
 		} else if (primary === 'ko' || primary === 'korean' || primary === 'koreana') {
 			language = 'Korean';
+		} else if (primary === 'th' || primary === 'thai') {
+			language = 'Thai';
 		} else {
 			language = 'English';
 		}
@@ -461,7 +479,7 @@ function updateSubtitleLanguage() {
 	window.selectedLanguage = language;
 	textbox.lang = subtitleLocales[language];
 	const clip = currentTracks.at(-1);
-	if (dialogBox && clip) textbox.textContent = clip.dialog[language][clip.index];
+	if (dialogBox && clip) textbox.textContent = getSubtitleText(clip.dialog, language, clip.index);
 }
 
 function init() {
